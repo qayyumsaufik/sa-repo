@@ -148,7 +148,6 @@
   background: var(--bg-card);
   border-radius: 16px;
   padding: var(--spacing-lg);
-  box-shadow: var(--shadow-md);
   border: 1px solid var(--border-color-light);
   transition: all var(--transition-base);
   position: relative;
@@ -326,7 +325,6 @@
 .data-section {
   background: var(--bg-card);
   border-radius: 16px;
-  box-shadow: var(--shadow-md);
   border: 1px solid var(--border-color-light);
   overflow: hidden;
 }
