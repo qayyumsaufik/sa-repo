@@ -16,30 +16,40 @@ import { ConfirmDialogModule } from 'primeng/confirmdialog';
     <p-confirmDialog></p-confirmDialog>
     @if (isAuthenticated$ | async) {
       <app-sidebar />
-      <app-header />
+      
       <main class="main-content" [class.sidebar-collapsed]="sidebarService.isCollapsed()">
-        <router-outlet></router-outlet>
+        <app-header />
+        <div class="main-content-wrapper">
+          <router-outlet></router-outlet>
+        </div>
       </main>
     } @else {
       <main class="main-content no-sidebar">
-        <router-outlet></router-outlet>
+        <app-header />
+        <div class="main-content-wrapper">
+          <router-outlet></router-outlet>
+        </div>
       </main>
     }
   `,
   styles: [`
     .main-content {
-      margin-left: 280px;
-      margin-top: 64px;
-      min-height: calc(100vh - 64px);
-      padding: 2rem;
-      background-color: #f8fafc;
-      transition: margin-left 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    margin-left: 258px;
+    background-color: #edf1f5;
+    transition: margin-left 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    height: 100%;
+    padding: 12px 24px 20px;
+    overflow: auto;
     }
-
+    .main-content-wrapper{
+      padding-top: 20px
+    }
     .main-content.sidebar-collapsed {
       margin-left: 80px;
     }
-
+.p-card{
+  box-shadow: none;
+}
     .main-content.no-sidebar {
       margin-left: 0;
       margin-top: 0;

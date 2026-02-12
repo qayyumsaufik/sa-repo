@@ -59,9 +59,9 @@ export class HeaderComponent {
   ]);
 
   headerStyle = computed(() => ({
-    position: 'fixed',
+    position: 'relative',
     top: '0',
-    left: this.sidebarService.isCollapsed() ? '80px' : '280px',
+    left: '0',
     right: '0',
     height: '64px',
     'z-index': '999',

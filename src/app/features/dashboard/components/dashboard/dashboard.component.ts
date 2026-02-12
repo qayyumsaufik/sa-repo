@@ -127,6 +127,21 @@ export class DashboardComponent implements OnInit {
     }
   }
 
+  getStatusIcon(status: string): string {
+    switch (status) {
+      case 'Green': return 'pi pi-check-circle';
+      case 'Yellow': return 'pi pi-exclamation-triangle';
+      case 'Red': return 'pi pi-times-circle';
+      default: return 'pi pi-info-circle';
+    }
+  }
+
+  getHealthPercentage(): number {
+    const total = this.normalSites() + this.alarmedSites();
+    if (total === 0) return 100;
+    return Math.round((this.normalSites() / total) * 100);
+  }
+
   trackBySiteId(index: number, site: SiteOverview): number {
     return site.siteId;
   }

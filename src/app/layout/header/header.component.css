@@ -4,10 +4,8 @@
 
 app-header p-toolbar,
 app-header .p-toolbar {
-  background: #3b82f6;
-  color: #ffffff;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
-  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+      background: #ffffff;
+    border: 0;
 }
 
 app-header .p-toolbar-group-start {
@@ -20,7 +18,7 @@ app-header .p-toolbar-group-start {
 app-header .header-title {
   font-size: 1.25rem;
   font-weight: 600;
-  color: #ffffff;
+  color: #0f172a;
   letter-spacing: -0.01em;
 }
 
@@ -35,7 +33,7 @@ app-header .p-toolbar-group-end {
 app-header p-toolbar .p-button,
 app-header .p-toolbar .p-button,
 app-header .user-menu-button {
-  color: #ffffff;
+  color: #0f172a;
   font-weight: 500;
   padding: 0.5rem 1rem;
   border-radius: 6px;
@@ -52,7 +50,7 @@ app-header .user-menu-button.loading {
 app-header p-toolbar .p-button:hover,
 app-header .p-toolbar .p-button:hover {
   background: rgba(255, 255, 255, 0.15);
-  color: #ffffff;
+  /* color: #ffffff; */
 }
 
 app-header p-toolbar .p-button:active,

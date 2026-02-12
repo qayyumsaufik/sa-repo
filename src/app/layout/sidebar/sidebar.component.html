@@ -1,4 +1,11 @@
 <nav class="sidebar" [class.collapsed]="isCollapsed()">
+  <button
+      class="toggle-button"
+      (click)="toggleCollapse()"
+      [title]="isCollapsed() ? 'Expand sidebar' : 'Collapse sidebar'">
+      <i [class]="isCollapsed() ? 'pi pi-chevron-right' : 'pi pi-chevron-left'"></i>
+    </button>
+  <!-- Header -->
   <div class="sidebar-header">
     <div class="logo-section">
       <i class="pi pi-building"></i>
@@ -9,19 +16,252 @@
         </div>
       }
     </div>
-    <p-button 
-      [icon]="isCollapsed() ? 'pi pi-chevron-right' : 'pi pi-chevron-left'"
-      [text]="true"
-      [rounded]="true"
-      (click)="toggleCollapse()"
-      [pTooltip]="isCollapsed() ? 'Expand sidebar' : 'Collapse sidebar'"
-      tooltipPosition="right">
-    </p-button>
+    
   </div>
 
-  <p-menu 
-    [model]="menuItems()" 
-    styleClass="sidebar-menu"
-    [class.devices-menu-open]="isDevicesMenuOpen()"
-    #menu></p-menu>
+  <!-- Menu -->
+  <div class="sidebar-menu">
+    <ul class="menu-list">
+      <!-- Dashboard -->
+      @if (hasPermission('View Sites')) {
+        <li class="menu-item">
+          <a routerLink="/dashboard" routerLinkActive="active" class="menu-link">
+            <i class="pi pi-home menu-icon"></i>
+            @if (!isCollapsed()) {
+              <span class="menu-text">Dashboard</span>
+            }
+          </a>
+        </li>
+      }
+
+      <!-- Devices Submenu -->
+      @if (hasPermission('View Devices')) {
+        <li class="menu-item" [class.has-submenu]="true">
+          <div class="menu-link submenu-toggle" (click)="toggleSubmenu('devices', '/devices')">
+            <i class="pi pi-desktop menu-icon"></i>
+            @if (!isCollapsed()) {
+              <span class="menu-text">Devices</span>
+              <i class="pi submenu-arrow" [class.pi-chevron-down]="!isSubmenuOpen('devices')" [class.pi-chevron-up]="isSubmenuOpen('devices')"></i>
+            }
+          </div>
+          @if (isSubmenuOpen('devices') || isCollapsed()) {
+            <ul class="submenu-list" [class.open]="isCollapsedSubmenuOpen('devices')">
+               @if (hasPermission('View Devices')) {
+                <li class="submenu-item">
+                  <a routerLink="/devices" routerLinkActive="active" class="submenu-link">
+                    <i class="pi pi-desktop submenu-icon"></i>
+                    <span class="submenu-text">Devices</span>
+                  </a>
+                </li>
+              }
+              @if (hasPermission('View Zones')) {
+                <li class="submenu-item">
+                  <a routerLink="/zones" routerLinkActive="active" class="submenu-link">
+                    <i class="pi pi-map-marker submenu-icon"></i>
+                    <span class="submenu-text">Zones</span>
+                  </a>
+                </li>
+              }
+              @if (hasPermission('View Sites')) {
+                <li class="submenu-item">
+                  <a routerLink="/sites" routerLinkActive="active" class="submenu-link">
+                    <i class="pi pi-building submenu-icon"></i>
+                    <span class="submenu-text">Sites</span>
+                  </a>
+                </li>
+              }
+             
+              @if (hasPermission('View Sensors')) {
+                <li class="submenu-item">
+                  <a routerLink="/sensors" routerLinkActive="active" class="submenu-link">
+                    <i class="pi pi-wifi submenu-icon"></i>
+                    <span class="submenu-text">Sensors</span>
+                  </a>
+                </li>
+              }
+              @if (hasPermission('View Readings')) {
+                <li class="submenu-item">
+                  <a routerLink="/readings" routerLinkActive="active" class="submenu-link">
+                    <i class="pi pi-chart-line submenu-icon"></i>
+                    <span class="submenu-text">Readings</span>
+                  </a>
+                </li>
+              }
+            </ul>
+          }
+        </li>
+      }
+
+      <!-- Events -->
+      @if (hasPermission('View Events')) {
+        <li class="menu-item">
+          <a routerLink="/events" routerLinkActive="active" class="menu-link">
+            <i class="pi pi-exclamation-triangle menu-icon"></i>
+            @if (!isCollapsed()) {
+              <span class="menu-text">Events</span>
+            }
+          </a>
+        </li>
+      }
+
+      <!-- Maintenance -->
+      @if (hasPermission('View Maintenance')) {
+        <li class="menu-item">
+          <a routerLink="/maintenance" routerLinkActive="active" class="menu-link">
+            <i class="pi pi-wrench menu-icon"></i>
+            @if (!isCollapsed()) {
+              <span class="menu-text">Maintenance</span>
+            }
+          </a>
+        </li>
+      }
+
+      <!-- Users -->
+      @if (hasRole('SuperAdministrator')) {
+        <li class="menu-item" [class.has-submenu]="true">
+          <div class="menu-link submenu-toggle" (click)="toggleSubmenu('users', '/users')">
+            <i class="pi pi-users menu-icon"></i>
+            @if (!isCollapsed()) {
+              <span class="menu-text">Users</span>
+              <i class="pi submenu-arrow" [class.pi-chevron-down]="!isSubmenuOpen('users')" [class.pi-chevron-up]="isSubmenuOpen('users')"></i>
+            }
+          </div>
+          @if (isSubmenuOpen('users') || isCollapsed()) {
+            <ul class="submenu-list" [class.open]="isCollapsedSubmenuOpen('users')">
+              <li class="submenu-item">
+                <a routerLink="/users" routerLinkActive="active" [routerLinkActiveOptions]="{exact: true}" class="submenu-link">
+                  <i class="pi pi-list submenu-icon"></i>
+                  <span class="submenu-text">All Users</span>
+                </a>
+              </li>
+              @for (tenant of tenantList(); track tenant.id) {
+                <li class="submenu-item">
+                  <a [routerLink]="['/users']" [queryParams]="{tenantId: tenant.id}" routerLinkActive="active" class="submenu-link">
+                    <i class="pi pi-building submenu-icon"></i>
+                    <span class="submenu-text">{{ tenant.name }}</span>
+                  </a>
+                </li>
+              }
+            </ul>
+          }
+        </li>
+      } @else if (hasPermission('View Users')) {
+        <li class="menu-item">
+          <a routerLink="/users" routerLinkActive="active" class="menu-link">
+            <i class="pi pi-users menu-icon"></i>
+            @if (!isCollapsed()) {
+              <span class="menu-text">Users</span>
+            }
+          </a>
+        </li>
+      }
+
+      <!-- Notifications -->
+      @if (hasPermission('View Notifications')) {
+        <li class="menu-item">
+          <a routerLink="/notifications" routerLinkActive="active" class="menu-link">
+            <i class="pi pi-bell menu-icon"></i>
+            @if (!isCollapsed()) {
+              <span class="menu-text">Notifications</span>
+            }
+          </a>
+        </li>
+      }
+
+      <!-- Support -->
+      <li class="menu-item">
+        <a routerLink="/support" routerLinkActive="active" class="menu-link">
+          <i class="pi pi-question-circle menu-icon"></i>
+          @if (!isCollapsed()) {
+            <span class="menu-text">Support</span>
+          }
+        </a>
+      </li>
+
+      <!-- Admin Settings -->
+      @if (hasRole('SuperAdministrator')) {
+        <li class="menu-item" [class.has-submenu]="true">
+          <div class="menu-link submenu-toggle" (click)="toggleSubmenu('adminSettings', '/tenants')">
+            <i class="pi pi-sliders-h menu-icon"></i>
+            @if (!isCollapsed()) {
+              <span class="menu-text">Admin Settings</span>
+              <i class="pi submenu-arrow" [class.pi-chevron-down]="!isSubmenuOpen('adminSettings')" [class.pi-chevron-up]="isSubmenuOpen('adminSettings')"></i>
+            }
+          </div>
+          @if (isSubmenuOpen('adminSettings') || isCollapsed()) {
+            <ul class="submenu-list" [class.open]="isCollapsedSubmenuOpen('adminSettings')">
+              @if (hasPermission('View System Settings')) {
+                <li class="submenu-item">
+                  <a routerLink="/eventtypes" routerLinkActive="active" class="submenu-link">
+                    <i class="pi pi-tag submenu-icon"></i>
+                    <span class="submenu-text">EventTypes</span>
+                  </a>
+                </li>
+                <li class="submenu-item">
+                  <a routerLink="/regtypes" routerLinkActive="active" class="submenu-link">
+                    <i class="pi pi-list submenu-icon"></i>
+                    <span class="submenu-text">RegTypes</span>
+                  </a>
+                </li>
+              }
+              <li class="submenu-item">
+                <a routerLink="/tenants" routerLinkActive="active" class="submenu-link">
+                  <i class="pi pi-briefcase submenu-icon"></i>
+                  <span class="submenu-text">Tenants</span>
+                </a>
+              </li>
+              @if (hasPermission('View Roles')) {
+                <li class="submenu-item">
+                  <a routerLink="/roles" routerLinkActive="active" class="submenu-link">
+                    <i class="pi pi-shield submenu-icon"></i>
+                    <span class="submenu-text">Roles</span>
+                  </a>
+                </li>
+              }
+            </ul>
+          }
+        </li>
+      }
+
+      <!-- Settings -->
+      <li class="menu-item">
+        <a routerLink="/settings" routerLinkActive="active" class="menu-link">
+          <i class="pi pi-cog menu-icon"></i>
+          @if (!isCollapsed()) {
+            <span class="menu-text">Settings</span>
+          }
+        </a>
+      </li>
+    </ul>
+  </div>
+
+  <!-- Footer -->
+  <div class="sidebar-footer">
+    <!-- User Profile Section -->
+    @if (user()) {
+      <div class="user-profile">
+        <div class="user-avatar">
+          {{ user()?.initial }}
+        </div>
+        @if (!isCollapsed()) {
+          <div class="user-info">
+            <div class="user-name">{{ user()?.name }}</div>
+            <div class="user-email">{{ user()?.email }}</div>
+          </div>
+          <!-- <i class="pi pi-chevron-right user-chevron"></i> -->
+        }
+      </div>
+    }
+
+    <!-- Logout Button -->
+    <div class="logout-section">
+      <button class="logout-button" (click)="logout()">
+        <i class="pi pi-sign-out"></i>
+        @if (!isCollapsed()) {
+          <span>Log Out</span>
+          <i class="pi pi-chevron-right logout-chevron"></i>
+        }
+      </button>
+    </div>
+  </div>
 </nav>

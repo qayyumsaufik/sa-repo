@@ -1,106 +1,230 @@
-<div class="dashboard">
+<div class="dashboard-container">
+  <!-- Header Section -->
   <div class="dashboard-header">
-    <h1>Dashboard</h1>
-    <span class="subtitle">Global View</span>
+    <div class="header-content">
+      <div class="header-title-section">
+        <h1 class="page-title">Dashboard</h1>
+        <p class="page-subtitle">Real-time monitoring and analytics</p>
+      </div>
+      <div class="header-actions">
+        <button class="action-button refresh-btn" (click)="loadDashboardData()" title="Refresh Data">
+          <i class="pi pi-refresh"></i>
+          <span>Refresh</span>
+        </button>
+      </div>
+    </div>
   </div>
 
   <app-error-message [onDismiss]="clearError" />
   <app-loading-spinner />
 
   @if (summary() && !loadingService.loading()) {
-    <!-- Global View -->
-    <div class="global-view">
-      <!-- Summary Cards -->
-      <div class="summary-cards">
-        <div class="summary-card normal">
-          <div class="card-content">
-            <i class="pi pi-chart-line card-icon"></i>
-            <div class="card-text">
-              <span class="card-value">{{ normalSites() }}</span>
-              <span class="card-label">Normal</span>
+    <div class="dashboard-content">
+      <!-- Stats Grid -->
+      <div class="stats-grid">
+        <!-- Normal Sites Card -->
+        <div class="stat-card success">
+          <div class="stat-card-header">
+            <div class="stat-icon-wrapper success">
+              <i class="pi pi-check-circle stat-icon"></i>
+            </div>
+            <div class="stat-trend positive">
+              <i class="pi pi-arrow-up"></i>
             </div>
           </div>
+          <div class="stat-card-body">
+            <h2 class="stat-value">{{ normalSites() }}</h2>
+            <p class="stat-label">Normal Sites</p>
+            <p class="stat-description">Operating within parameters</p>
+          </div>
+          <div class="stat-card-footer">
+            <i class="pi pi-circle-fill status-indicator"></i>
+            <span class="footer-text">All systems operational</span>
+          </div>
         </div>
-        <div class="summary-card alarmed">
-          <div class="card-content">
-            <i class="pi pi-bell card-icon"></i>
-            <div class="card-text">
-              <span class="card-value">{{ alarmedSites() }}</span>
-              <span class="card-label">Alarmed</span>
+
+        <!-- Alarmed Sites Card -->
+        <div class="stat-card danger">
+          <div class="stat-card-header">
+            <div class="stat-icon-wrapper danger">
+              <i class="pi pi-exclamation-triangle stat-icon"></i>
             </div>
+            <div class="stat-trend negative">
+              <i class="pi pi-arrow-down"></i>
+            </div>
+          </div>
+          <div class="stat-card-body">
+            <h2 class="stat-value">{{ alarmedSites() }}</h2>
+            <p class="stat-label">Alarmed Sites</p>
+            <p class="stat-description">Requires immediate attention</p>
+          </div>
+          <div class="stat-card-footer">
+            <i class="pi pi-circle-fill status-indicator"></i>
+            <span class="footer-text">Alert notifications active</span>
+          </div>
+        </div>
+
+        <!-- Total Sites Card -->
+        <div class="stat-card info">
+          <div class="stat-card-header">
+            <div class="stat-icon-wrapper info">
+              <i class="pi pi-building stat-icon"></i>
+            </div>
+          </div>
+          <div class="stat-card-body">
+            <h2 class="stat-value">{{ normalSites() + alarmedSites() }}</h2>
+            <p class="stat-label">Total Sites</p>
+            <p class="stat-description">Across all regions</p>
+          </div>
+          <div class="stat-card-footer">
+            <i class="pi pi-circle-fill status-indicator"></i>
+            <span class="footer-text">Monitoring active</span>
+          </div>
+        </div>
+
+        <!-- Performance Metric Card -->
+        <div class="stat-card primary">
+          <div class="stat-card-header">
+            <div class="stat-icon-wrapper primary">
+              <i class="pi pi-chart-line stat-icon"></i>
+            </div>
+          </div>
+          <div class="stat-card-body">
+            <h2 class="stat-value">{{ getHealthPercentage() }}%</h2>
+            <p class="stat-label">System Health</p>
+            <p class="stat-description">Overall performance metric</p>
+          </div>
+          <div class="stat-card-footer">
+            <i class="pi pi-circle-fill status-indicator"></i>
+            <span class="footer-text">Updated in real-time</span>
           </div>
         </div>
       </div>
 
-      <!-- Site Overview Table -->
-      <p-card class="site-overview-card">
-        <ng-template pTemplate="header">
-          <div class="card-header">
-            <div>
-            <h3>Site Overview</h3>
-            <p class="subtitle">View and manage all sites</p>
+      <!-- Site Overview Section -->
+      <div class="data-section">
+        <div class="section-header">
+          <div class="section-header-left">
+            <h2 class="section-title">
+              <i class="pi pi-list section-icon"></i>
+              Site Overview
+            </h2>
+            <p class="section-subtitle">View and manage all monitored sites</p>
+          </div>
+          <div class="section-header-right">
+            <span class="data-count">{{ siteOverview().length }} sites</span>
+          </div>
+        </div>
+
+        <div class="table-container">
+          @if (siteOverview().length > 0) {
+            <p-table
+              [value]="siteOverview()"
+              dataKey="siteId"
+              [rowTrackBy]="trackBySiteId"
+              [paginator]="true"
+              [rows]="itemsPerPage()"
+              [first]="currentPage() * itemsPerPage()"
+              [rowsPerPageOptions]="[10, 25, 50]"
+              [showCurrentPageReport]="true"
+              currentPageReportTemplate="Showing {first} to {last} of {totalRecords} entries"
+              (onPage)="onPageChange($event)"
+              styleClass="enterprise-table">
+              <ng-template pTemplate="header">
+                <tr>
+                  <th>
+                    <div class="th-content">
+                      <i class="pi pi-building th-icon"></i>
+                      <span>Site Name</span>
+                    </div>
+                  </th>
+                  <th>
+                    <div class="th-content">
+                      <i class="pi pi-chart-bar th-icon"></i>
+                      <span>Level</span>
+                    </div>
+                  </th>
+                  <th>
+                    <div class="th-content">
+                      <i class="pi pi-info-circle th-icon"></i>
+                      <span>Status</span>
+                    </div>
+                  </th>
+                  <th>
+                    <div class="th-content">
+                      <i class="pi pi-map-marker th-icon"></i>
+                      <span>Region</span>
+                    </div>
+                  </th>
+                  <th class="action-column">
+                    <div class="th-content">
+                      <i class="pi pi-cog th-icon"></i>
+                      <span>Actions</span>
+                    </div>
+                  </th>
+                </tr>
+              </ng-template>
+              <ng-template pTemplate="body" let-site>
+                <tr [class.alarmed-row]="site.status === 'Red' || site.status === 'Yellow'">
+                  <td>
+                    <div class="site-name-cell">
+                      <i class="pi pi-building cell-icon"></i>
+                      <span class="site-name-text">{{ site.siteName }}</span>
+                    </div>
+                  </td>
+                  <td>
+                    <span class="level-badge">{{ site.level || 'NA' }}</span>
+                  </td>
+                  <td>
+                    <p-tag
+                      [value]="site.status"
+                      [severity]="getStatusSeverity(site.status)"
+                      [icon]="getStatusIcon(site.status)">
+                    </p-tag>
+                  </td>
+                  <td>
+                    <div class="region-cell">
+                      <i class="pi pi-map-marker cell-icon"></i>
+                      <span>{{ site.region || site.zoneName }}</span>
+                    </div>
+                  </td>
+                  <td class="action-column">
+                    <button
+                      class="action-btn view-btn"
+                      (click)="viewSiteDetails(site.siteId)"
+                      title="View Site Details">
+                      <i class="pi pi-eye"></i>
+                      <span>View</span>
+                    </button>
+                  </td>
+                </tr>
+              </ng-template>
+            </p-table>
+          } @else {
+            <div class="empty-state">
+              <div class="empty-state-icon">
+                <i class="pi pi-inbox"></i>
+              </div>
+              <h3 class="empty-state-title">No sites found</h3>
+              <p class="empty-state-description">There are currently no sites to display. Check back later or contact your administrator.</p>
             </div>
-          </div>
-        </ng-template>
-        @if (siteOverview().length > 0) {
-          <p-table 
-            [value]="siteOverview()" 
-            dataKey="siteId"
-            [rowTrackBy]="trackBySiteId"
-            [paginator]="true" 
-            [rows]="itemsPerPage()"
-            [first]="currentPage() * itemsPerPage()"
-            [rowsPerPageOptions]="[10, 25, 50]"
-            [showCurrentPageReport]="true"
-            currentPageReportTemplate="Showing {first} to {last} of {totalRecords} entries"
-            (onPage)="onPageChange($event)">
-            <ng-template pTemplate="header">
-              <tr>
-                <th>Site Name</th>
-                <th>Level</th>
-                <th>Status</th>
-                <th>Region</th>
-                <th>Action</th>
-              </tr>
-            </ng-template>
-            <ng-template pTemplate="body" let-site>
-              <tr [class.alarmed-row]="site.status === 'Red' || site.status === 'Yellow'">
-                <td>{{ site.siteName }}</td>
-                <td>{{ site.level || 'NA' }}</td>
-                <td>
-                  <p-tag [value]="site.status" [severity]="getStatusSeverity(site.status)"></p-tag>
-                </td>
-                <td>{{ site.region || site.zoneName }}</td>
-                <td>
-                  <p-button 
-                    icon="pi pi-eye" 
-                    [text]="true" 
-                    [rounded]="true"
-                    severity="info"
-                    (onClick)="viewSiteDetails(site.siteId)"
-                    pTooltip="View Site Details"
-                    tooltipPosition="top">
-                  </p-button>
-                </td>
-              </tr>
-            </ng-template>
-          </p-table>
-        } @else {
-          <div class="empty-state">
-            <i class="pi pi-inbox" style="font-size: 3rem; color: #94a3b8;"></i>
-            <p>No sites found.</p>
-          </div>
-        }
-      </p-card>
+          }
+        </div>
+      </div>
     </div>
   }
 
   @if (!loadingService.loading() && !summary()) {
-    <p-card>
-      <div class="empty-state">
-        <i class="pi pi-info-circle" style="font-size: 3rem; color: #94a3b8;"></i>
-        <p>No dashboard data available.</p>
+    <div class="empty-dashboard">
+      <div class="empty-dashboard-icon">
+        <i class="pi pi-chart-line"></i>
       </div>
-    </p-card>
+      <h2 class="empty-dashboard-title">No Dashboard Data Available</h2>
+      <p class="empty-dashboard-description">Unable to load dashboard data. Please try refreshing the page or contact support if the issue persists.</p>
+      <button class="retry-button" (click)="loadDashboardData()">
+        <i class="pi pi-refresh"></i>
+        <span>Retry</span>
+      </button>
+    </div>
   }
 </div>
