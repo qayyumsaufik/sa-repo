@@ -1,0 +1,42 @@
+import { Component, Input, Output, EventEmitter, ChangeDetectionStrategy } from '@angular/core';
+import { CommonModule } from '@angular/common';
+import { DialogModule } from 'primeng/dialog';
+import { ButtonModule } from 'primeng/button';
+
+@Component({
+  selector: 'app-modal',
+  standalone: true,
+  imports: [CommonModule, DialogModule, ButtonModule],
+  changeDetection: ChangeDetectionStrategy.OnPush,
+  template: `
+    <p-dialog 
+      [(visible)]="isOpen"
+      [modal]="true"
+      [style]="{width: '500px'}"
+      [draggable]="false"
+      [resizable]="false"
+      (onHide)="onClose()">
+      <ng-template pTemplate="header">
+        <span class="p-text-bold">{{ title }}</span>
+      </ng-template>
+      <ng-content></ng-content>
+      @if (showFooter) {
+        <ng-template pTemplate="footer">
+          <ng-content select="[footer]"></ng-content>
+        </ng-template>
+      }
+    </p-dialog>
+  `,
+  styles: []
+})
+export class ModalComponent {
+  @Input() isOpen = false;
+  @Input() title = '';
+  @Input() showFooter = true;
+  @Output() close = new EventEmitter<void>();
+
+  onClose(): void {
+    this.isOpen = false;
+    this.close.emit();
+  }
+}

@@ -1,0 +1,51 @@
+.user-profile {
+  max-width: 900px;
+  margin: 0 auto;
+}
+
+.profile-content {
+  padding: 0;
+}
+
+.profile-section-card h3 {
+  margin: 0;
+  font-size: 1.125rem;
+  font-weight: 600;
+  color: #0f172a;
+}
+
+.info-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+  gap: 24px;
+}
+
+.info-item {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.info-item label {
+  font-weight: 600;
+  color: #64748b;
+  font-size: 14px;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.info-item .value {
+  font-size: 16px;
+  color: #0f172a;
+}
+
+.tags-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.text-muted {
+  color: #94a3b8;
+  font-style: italic;
+}

@@ -1,0 +1,106 @@
+<div class="dashboard">
+  <div class="dashboard-header">
+    <h1>Dashboard</h1>
+    <span class="subtitle">Global View</span>
+  </div>
+
+  <app-error-message [onDismiss]="clearError" />
+  <app-loading-spinner />
+
+  @if (summary() && !loadingService.loading()) {
+    <!-- Global View -->
+    <div class="global-view">
+      <!-- Summary Cards -->
+      <div class="summary-cards">
+        <div class="summary-card normal">
+          <div class="card-content">
+            <i class="pi pi-chart-line card-icon"></i>
+            <div class="card-text">
+              <span class="card-value">{{ normalSites() }}</span>
+              <span class="card-label">Normal</span>
+            </div>
+          </div>
+        </div>
+        <div class="summary-card alarmed">
+          <div class="card-content">
+            <i class="pi pi-bell card-icon"></i>
+            <div class="card-text">
+              <span class="card-value">{{ alarmedSites() }}</span>
+              <span class="card-label">Alarmed</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Site Overview Table -->
+      <p-card class="site-overview-card">
+        <ng-template pTemplate="header">
+          <div class="card-header">
+            <div>
+            <h3>Site Overview</h3>
+            <p class="subtitle">View and manage all sites</p>
+            </div>
+          </div>
+        </ng-template>
+        @if (siteOverview().length > 0) {
+          <p-table 
+            [value]="siteOverview()" 
+            dataKey="siteId"
+            [rowTrackBy]="trackBySiteId"
+            [paginator]="true" 
+            [rows]="itemsPerPage()"
+            [first]="currentPage() * itemsPerPage()"
+            [rowsPerPageOptions]="[10, 25, 50]"
+            [showCurrentPageReport]="true"
+            currentPageReportTemplate="Showing {first} to {last} of {totalRecords} entries"
+            (onPage)="onPageChange($event)">
+            <ng-template pTemplate="header">
+              <tr>
+                <th>Site Name</th>
+                <th>Level</th>
+                <th>Status</th>
+                <th>Region</th>
+                <th>Action</th>
+              </tr>
+            </ng-template>
+            <ng-template pTemplate="body" let-site>
+              <tr [class.alarmed-row]="site.status === 'Red' || site.status === 'Yellow'">
+                <td>{{ site.siteName }}</td>
+                <td>{{ site.level || 'NA' }}</td>
+                <td>
+                  <p-tag [value]="site.status" [severity]="getStatusSeverity(site.status)"></p-tag>
+                </td>
+                <td>{{ site.region || site.zoneName }}</td>
+                <td>
+                  <p-button 
+                    icon="pi pi-eye" 
+                    [text]="true" 
+                    [rounded]="true"
+                    severity="info"
+                    (onClick)="viewSiteDetails(site.siteId)"
+                    pTooltip="View Site Details"
+                    tooltipPosition="top">
+                  </p-button>
+                </td>
+              </tr>
+            </ng-template>
+          </p-table>
+        } @else {
+          <div class="empty-state">
+            <i class="pi pi-inbox" style="font-size: 3rem; color: #94a3b8;"></i>
+            <p>No sites found.</p>
+          </div>
+        }
+      </p-card>
+    </div>
+  }
+
+  @if (!loadingService.loading() && !summary()) {
+    <p-card>
+      <div class="empty-state">
+        <i class="pi pi-info-circle" style="font-size: 3rem; color: #94a3b8;"></i>
+        <p>No dashboard data available.</p>
+      </div>
+    </p-card>
+  }
+</div>

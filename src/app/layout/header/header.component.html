@@ -1,0 +1,26 @@
+<p-toolbar [style]="headerStyle()">
+  <div class="p-toolbar-group-start">
+    <span class="header-title">Dashboard</span>
+  </div>
+  <div class="p-toolbar-group-end">
+    @if (user(); as currentUser) {
+      <p-menu #userMenu [model]="userMenuItems()" [popup]="true" [appendTo]="'body'" [baseZIndex]="1200"></p-menu>
+      <p-button 
+        [label]="currentUser.name"
+        icon="pi pi-user"
+        [text]="true"
+        [rounded]="true"
+        (onClick)="userMenu.toggle($event)"
+        class="user-menu-button">
+      </p-button>
+    } @else {
+      <p-button 
+        label="Loading..."
+        icon="pi pi-spin pi-spinner"
+        [text]="true"
+        [disabled]="true"
+        class="user-menu-button loading">
+      </p-button>
+    }
+  </div>
+</p-toolbar>

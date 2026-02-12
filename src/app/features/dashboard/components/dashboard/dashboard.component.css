@@ -1,0 +1,195 @@
+/* ============================================
+   ENTERPRISE DASHBOARD DESIGN
+   ============================================ */
+
+.dashboard {
+  padding: 0;
+  background: transparent;
+  min-height: 100%;
+}
+
+.dashboard-header {
+  margin-bottom: 2rem;
+  display: flex;
+  align-items: baseline;
+  gap: 1rem;
+  padding-bottom: 1.5rem;
+  border-bottom: 2px solid #e2e8f0;
+}
+
+.dashboard-header h1 {
+  margin: 0;
+  font-size: 2rem;
+  color: #0f172a;
+  font-weight: 700;
+  letter-spacing: -0.02em;
+}
+
+.dashboard-header .subtitle {
+  font-size: 1rem;
+  color: #64748b;
+  font-weight: 400;
+}
+
+.global-view {
+  display: flex;
+  flex-direction: column;
+  gap: 2rem;
+}
+
+/* Summary Cards - Enterprise Design */
+.summary-cards {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: 1.5rem;
+}
+
+.summary-card {
+  min-height: 140px;
+  border-radius: 12px;
+  padding: 2rem;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  transition: all 0.3s ease;
+  background: white;
+  position: relative;
+  overflow: hidden;
+  border: 1px solid #e2e8f0;
+}
+
+.summary-card::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 4px;
+  background: inherit;
+  border-radius: 12px 12px 0 0;
+}
+
+.summary-card:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 8px 16px rgba(0, 0, 0, 0.15);
+}
+
+.summary-card.normal {
+  background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+  color: white;
+}
+
+.summary-card.alarmed {
+  background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
+  color: white;
+}
+
+.summary-card .card-content {
+  display: flex;
+  align-items: center;
+  gap: 1.5rem;
+  height: 100%;
+  position: relative;
+  z-index: 1;
+}
+
+.summary-card .card-icon {
+  font-size: 3.5rem;
+  width: 3.5rem;
+  height: 3.5rem;
+  color: rgba(255, 255, 255, 0.95);
+  filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.2));
+  flex-shrink: 0;
+}
+
+.summary-card .card-text {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  flex: 1;
+}
+
+.summary-card .card-value {
+  font-size: 3rem;
+  font-weight: 700;
+  line-height: 1;
+  letter-spacing: -0.02em;
+}
+
+.summary-card .card-label {
+  font-size: 1.125rem;
+  opacity: 0.95;
+  font-weight: 500;
+  letter-spacing: 0.01em;
+}
+
+/* Site Overview Card */
+.site-overview-card {
+  margin-top: 0;
+}
+
+.site-overview-card .p-card-header {
+  background: #ffffff;
+  border-bottom: 1px solid #e2e8f0;
+  padding: 1.5rem;
+}
+
+.site-overview-card .p-card-header h3 {
+  margin: 0 0 0.5rem 0;
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: #0f172a;
+}
+
+.site-overview-card .p-card-header .subtitle {
+  margin: 0;
+  color: #64748b;
+  font-size: 0.9375rem;
+}
+
+.site-overview-card .p-card-body {
+  padding: 0;
+}
+
+.site-overview-card .p-datatable {
+  width: 100%;
+  border: none;
+}
+
+.site-overview-card .p-datatable .p-datatable-thead > tr > th {
+  background: #f8fafc;
+  color: #475569;
+  font-weight: 600;
+  text-transform: uppercase;
+  font-size: 0.75rem;
+  letter-spacing: 0.05em;
+  padding: 1rem 1.5rem;
+  border-bottom: 2px solid #e2e8f0;
+}
+
+.site-overview-card .p-datatable .p-datatable-tbody > tr {
+  transition: background-color 0.15s;
+}
+
+.site-overview-card .p-datatable .p-datatable-tbody > tr:hover {
+  background-color: #f8fafc;
+}
+
+.site-overview-card .p-datatable .p-datatable-tbody > tr.alarmed-row {
+  background-color: #fef2f2;
+}
+
+.site-overview-card .p-datatable .p-datatable-tbody > tr.alarmed-row:hover {
+  background-color: #fee2e2;
+}
+
+.site-overview-card .p-datatable .p-datatable-tbody > tr > td {
+  padding: 1rem 1.5rem;
+  border-bottom: 1px solid #f1f5f9;
+  color: #334155;
+}
+
+.empty-state {
+  text-align: center;
+  padding: 3rem 2rem;
+  color: #64748b;
+  font-style: italic;
+}

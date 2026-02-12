@@ -1,0 +1,12 @@
+.zone-list {
+  padding: 0;
+}
+
+.filter-row th {
+  padding: 0.25rem;
+}
+
+.filter-input {
+  width: 100%;
+  min-width: 0;
+}

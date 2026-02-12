@@ -1,0 +1,68 @@
+<div class="manage-permissions">
+  <p-card>
+    <ng-template pTemplate="header">
+      <div class="card-header">
+        <div>
+          <h2>Manage permissions – {{ roleName() }}</h2>
+          <p class="subtitle">No access, View only, or View and Manage per screen</p>
+        </div>
+        <div class="header-actions">
+          <a pButton label="Back to roles" icon="pi pi-arrow-left" class="p-button-text" routerLink="/roles"></a>
+          @if (canSave()) {
+            <p-button
+              label="Save"
+              icon="pi pi-check"
+              [loading]="saving()"
+              (onClick)="save()">
+            </p-button>
+          }
+        </div>
+      </div>
+    </ng-template>
+
+    <app-error-message [onDismiss]="clearError" />
+    <app-loading-spinner />
+
+    @if (!loadingService.loading() && rows().length > 0) {
+      <p-table [value]="rows()" dataKey="screenKey" styleClass="p-datatable-sm p-datatable-gridlines">
+        <ng-template pTemplate="header">
+          <tr>
+            <th style="width: 40%">Screen</th>
+            <th style="width: 20%">No access</th>
+            <th style="width: 20%">View</th>
+            <th style="width: 20%">Manage</th>
+          </tr>
+        </ng-template>
+        <ng-template pTemplate="body" let-row>
+          <tr>
+            <td>{{ row.displayName }}</td>
+            <td>
+              <input
+                type="radio"
+                [name]="'access-' + row.screenKey"
+                [value]="None"
+                [checked]="row.access === None"
+                (change)="setAccess(row, None)" />
+            </td>
+            <td>
+              <input
+                type="radio"
+                [name]="'access-' + row.screenKey"
+                [value]="View"
+                [checked]="row.access === View"
+                (change)="setAccess(row, View)" />
+            </td>
+            <td>
+              <input
+                type="radio"
+                [name]="'access-' + row.screenKey"
+                [value]="Manage"
+                [checked]="row.access === Manage"
+                (change)="setAccess(row, Manage)" />
+            </td>
+          </tr>
+        </ng-template>
+      </p-table>
+    }
+  </p-card>
+</div>

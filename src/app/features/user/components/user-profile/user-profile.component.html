@@ -1,0 +1,128 @@
+<div class="user-profile">
+  <p-card>
+    <ng-template pTemplate="header">
+      <div class="card-header">
+        <h2>User Profile</h2>
+        @if (!isEditing()) {
+          <p-button 
+            label="Edit Profile" 
+            icon="pi pi-pencil"
+            (onClick)="startEdit()">
+          </p-button>
+        }
+      </div>
+    </ng-template>
+
+    <app-error-message [onDismiss]="clearError" />
+    <app-loading-spinner />
+
+    @if (!loadingService.loading() && profile(); as userProfile) {
+      <div class="profile-content">
+        <!-- Personal Information -->
+        <p-card class="profile-section-card">
+          <ng-template pTemplate="header">
+            <h3>Personal Information</h3>
+          </ng-template>
+          <div class="info-grid">
+            <div class="p-field">
+              <label>Name</label>
+              <input pInputText [value]="fullName()" readonly class="full-width" />
+            </div>
+            <div class="p-field">
+              <label>Email</label>
+              <input pInputText [value]="userProfile.email" readonly class="full-width" />
+            </div>
+            <div class="p-field">
+              <label>User ID</label>
+              <input pInputText [value]="userProfile.userId" readonly class="full-width" />
+            </div>
+          </div>
+        </p-card>
+
+        <p-divider></p-divider>
+
+        <!-- Preferences -->
+        <p-card class="profile-section-card">
+          <ng-template pTemplate="header">
+            <h3>Preferences</h3>
+          </ng-template>
+          @if (isEditing()) {
+            <form (ngSubmit)="saveProfile()">
+              <div class="p-field">
+                <label for="defaultView">Default View *</label>
+                <p-dropdown 
+                  id="defaultView"
+                  [options]="viewOptions" 
+                  [(ngModel)]="defaultView" 
+                  name="defaultView"
+                  optionLabel="label"
+                  optionValue="value"
+                  placeholder="Select default view"
+                  class="full-width">
+                </p-dropdown>
+                <small>This determines your default view when opening site detail pages.</small>
+              </div>
+              <div class="form-actions">
+                <p-button 
+                  label="Cancel" 
+                  icon="pi pi-times"
+                  severity="secondary"
+                  type="button"
+                  (onClick)="cancelEdit()">
+                </p-button>
+                <p-button 
+                  label="Save Changes" 
+                  icon="pi pi-check"
+                  type="submit"
+                  [style]="{'margin-left': '0.5rem'}">
+                </p-button>
+              </div>
+            </form>
+          } @else {
+            <div class="info-grid">
+              <div class="p-field">
+                <label>Default View</label>
+                <input pInputText [value]="userProfile.defaultView" readonly class="full-width" />
+              </div>
+            </div>
+          }
+        </p-card>
+
+        <p-divider></p-divider>
+
+        <!-- Roles & Permissions -->
+        <p-card class="profile-section-card">
+          <ng-template pTemplate="header">
+            <h3>Roles & Permissions</h3>
+          </ng-template>
+          <div class="info-grid">
+            <div class="p-field">
+              <label>Roles</label>
+              <div class="tags-list">
+                @if (userProfile.roles.length > 0) {
+                  @for (role of userProfile.roles; track role) {
+                    <p-tag [value]="role" severity="info"></p-tag>
+                  }
+                } @else {
+                  <span class="text-muted">No roles assigned</span>
+                }
+              </div>
+            </div>
+            <div class="p-field">
+              <label>Permissions</label>
+              <div class="tags-list">
+                @if (userProfile.permissions.length > 0) {
+                  @for (permission of userProfile.permissions; track permission) {
+                    <p-tag [value]="permission" severity="info"></p-tag>
+                  }
+                } @else {
+                  <span class="text-muted">No permissions assigned</span>
+                }
+              </div>
+            </div>
+          </div>
+        </p-card>
+      </div>
+    }
+  </p-card>
+</div>

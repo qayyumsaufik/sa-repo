@@ -1,0 +1,223 @@
+<div class="notification-list">
+  <p-card>
+    <ng-template pTemplate="header">
+      <div class="card-header">
+        <div>
+          <h2>Notification Rules</h2>
+          <p class="subtitle">Configure when and how to notify users (e.g. when events are created or unresolved)</p>
+        </div>
+        @if (canManageNotifications()) {
+          <p-button
+            label="Create Rule"
+            icon="pi pi-plus"
+            (onClick)="showCreateForm()"
+            [style]="{'margin-left': 'auto'}">
+          </p-button>
+        }
+      </div>
+    </ng-template>
+
+    <app-error-message [onDismiss]="clearError" />
+    <app-loading-spinner />
+
+    <div class="filters">
+      <input
+        type="text"
+        pInputText
+        [ngModel]="nameSearch()"
+        (ngModelChange)="nameSearch.set($event)"
+        placeholder="Search by name"
+        (keyup.enter)="applyFilters()"
+        [style]="{'width': '200px'}" />
+      <p-dropdown
+        [options]="filterTriggerOptions"
+        [ngModel]="triggerTypeFilter()"
+        (ngModelChange)="triggerTypeFilter.set($event)"
+        optionLabel="label"
+        optionValue="value"
+        placeholder="Trigger"
+        [style]="{'width': '180px'}">
+      </p-dropdown>
+      <p-dropdown
+        [options]="filterActiveOptions"
+        [ngModel]="isActiveFilter()"
+        (ngModelChange)="isActiveFilter.set($event)"
+        optionLabel="label"
+        optionValue="value"
+        placeholder="Status"
+        [style]="{'width': '120px'}">
+      </p-dropdown>
+      <p-button label="Apply" icon="pi pi-filter" (onClick)="applyFilters()"></p-button>
+      <p-button label="Clear" icon="pi pi-filter-slash" severity="secondary" (onClick)="clearFilters()"></p-button>
+    </div>
+
+    @if (!loadingService.loading()) {
+      <p-table
+        [value]="rules()"
+        dataKey="id"
+        [rowTrackBy]="trackById"
+        [paginator]="true"
+        [rows]="10"
+        [showCurrentPageReport]="true"
+        [lazy]="true"
+        (onLazyLoad)="onLazyLoad($event)"
+        [totalRecords]="totalRecords()"
+        currentPageReportTemplate="Showing {first} to {last} of {totalRecords} entries"
+        [rowsPerPageOptions]="[10, 25, 50]">
+        <ng-template pTemplate="header">
+          <tr>
+            <th>Name</th>
+            <th>Trigger</th>
+            <th>Event Type</th>
+            <th>Channel</th>
+            <th>Recipient</th>
+            <th>Active</th>
+            <th>Created</th>
+            @if (canManageNotifications()) {
+              <th>Actions</th>
+            }
+          </tr>
+        </ng-template>
+        <ng-template pTemplate="body" let-rule>
+          <tr>
+            <td>{{ rule.name }}</td>
+            <td>
+              <p-tag [value]="rule.triggerType === 'EventCreated' ? 'Event Created' : 'Event Unresolved'" severity="info"></p-tag>
+            </td>
+            <td>{{ rule.eventTypeName ?? 'All' }}</td>
+            <td>{{ rule.channel }}</td>
+            <td>{{ rule.recipientUserName }}</td>
+            <td>
+              @if (rule.isActive) {
+                <p-tag value="Active" severity="success"></p-tag>
+              } @else {
+                <p-tag value="Inactive" severity="secondary"></p-tag>
+              }
+            </td>
+            <td>{{ rule.createdDate | date:'short' }}</td>
+            @if (canManageNotifications()) {
+              <td>
+                <p-button
+                  icon="pi pi-pencil"
+                  [text]="true"
+                  [rounded]="true"
+                  severity="info"
+                  (onClick)="editRule(rule)"
+                  pTooltip="Edit"
+                  tooltipPosition="top">
+                </p-button>
+                <p-button
+                  icon="pi pi-trash"
+                  [text]="true"
+                  [rounded]="true"
+                  severity="danger"
+                  (onClick)="deleteRule(rule.id)"
+                  pTooltip="Delete"
+                  tooltipPosition="top">
+                </p-button>
+              </td>
+            }
+          </tr>
+        </ng-template>
+      </p-table>
+    }
+    @if (!loadingService.loading() && rules().length === 0) {
+      <div class="empty-state">
+        <i class="pi pi-bell" style="font-size: 3rem; color: #999;"></i>
+        <p>No notification rules. Create a rule to notify users when events occur.</p>
+      </div>
+    }
+  </p-card>
+
+  <app-modal
+    [isOpen]="showModal()"
+    [title]="editingRule() ? 'Edit Notification Rule' : 'Create Notification Rule'"
+    (close)="closeModal()">
+    <form (ngSubmit)="saveRule()">
+      <div class="p-field">
+        <label for="rule-name">Name *</label>
+        <input
+          id="rule-name"
+          type="text"
+          pInputText
+          [(ngModel)]="formData.name"
+          name="name"
+          required
+          maxlength="200"
+          class="full-width"
+          placeholder="e.g. High severity alerts" />
+      </div>
+
+      <div class="p-field">
+        <label for="trigger">Trigger *</label>
+        <p-dropdown
+          id="trigger"
+          [options]="triggerTypeOptions"
+          [(ngModel)]="formData.triggerType"
+          name="triggerType"
+          optionLabel="label"
+          optionValue="value"
+          placeholder="When to notify"
+          class="full-width">
+        </p-dropdown>
+      </div>
+
+      <div class="p-field">
+        <label for="eventType">Event Type (optional)</label>
+        <p-dropdown
+          id="eventType"
+          [options]="eventTypeOptions()"
+          [(ngModel)]="formData.eventTypeId"
+          name="eventTypeId"
+          optionLabel="label"
+          optionValue="value"
+          [showClear]="true"
+          placeholder="All event types"
+          class="full-width">
+        </p-dropdown>
+      </div>
+
+      <div class="p-field">
+        <label for="channel">Channel *</label>
+        <p-dropdown
+          id="channel"
+          [options]="channelOptions"
+          [(ngModel)]="formData.channel"
+          name="channel"
+          optionLabel="label"
+          optionValue="value"
+          class="full-width">
+        </p-dropdown>
+      </div>
+
+      <div class="p-field">
+        <label for="recipient">Recipient *</label>
+        <p-dropdown
+          id="recipient"
+          [options]="userOptions()"
+          [(ngModel)]="formData.recipientUserId"
+          name="recipientUserId"
+          optionLabel="label"
+          optionValue="value"
+          placeholder="Select user"
+          class="full-width">
+        </p-dropdown>
+      </div>
+
+      <div class="p-field">
+        <p-checkbox
+          [(ngModel)]="formData.isActive"
+          name="isActive"
+          [binary]="true"
+          inputId="isActive">
+        </p-checkbox>
+        <label for="isActive">Active</label>
+      </div>
+
+      <div class="form-actions">
+        <p-button label="Cancel" [text]="true" (onClick)="closeModal()" type="button"></p-button>
+        <p-button label="Save" type="submit" [style]="{'margin-left': '0.5rem'}"></p-button>
+      </div>
+    </form>
+  </app-modal>
+</div>

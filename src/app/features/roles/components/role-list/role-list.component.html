@@ -1,0 +1,61 @@
+<div class="role-list">
+  <p-card>
+    <ng-template pTemplate="header">
+      <div class="card-header">
+        <div>
+          <h2>Roles</h2>
+          <p class="subtitle">Manage roles and their screen permissions</p>
+        </div>
+      </div>
+    </ng-template>
+
+    <app-error-message [onDismiss]="clearError" />
+    <app-loading-spinner />
+
+    <p-table
+      [value]="roles()"
+      dataKey="id"
+      [rowTrackBy]="trackByRoleId"
+      [paginator]="true"
+      [rows]="50"
+      [first]="tableFirst()"
+      [showCurrentPageReport]="true"
+      [lazy]="true"
+      (onLazyLoad)="onLazyLoad($event)"
+      [totalRecords]="totalRecords()"
+      currentPageReportTemplate="Showing {first} to {last} of {totalRecords} entries"
+      [rowsPerPageOptions]="[10, 25, 50]"
+      [loading]="loadingService.loading()">
+      <ng-template pTemplate="header">
+        <tr>
+          <th>Name</th>
+          <th>Description</th>
+          <th>Scope</th>
+          <th>Type</th>
+          @if (canManagePermissions()) {
+            <th>Actions</th>
+          }
+        </tr>
+      </ng-template>
+      <ng-template pTemplate="body" let-role>
+        <tr>
+          <td>{{ role.name }}</td>
+          <td>{{ role.description || '-' }}</td>
+          <td>{{ role.isSystemWide ? 'System-wide' : (role.tenantName ?? 'Tenant') }}</td>
+          <td>{{ role.isSystemRole ? 'System' : 'Custom' }}</td>
+          @if (canManagePermissions()) {
+            <td>
+              <a
+                pButton
+                icon="pi pi-key"
+                pTooltip="Manage permissions"
+                class="p-button-text p-button-sm"
+                [routerLink]="['/roles', 'permissions', role.id]">
+              </a>
+            </td>
+          }
+        </tr>
+      </ng-template>
+    </p-table>
+  </p-card>
+</div>

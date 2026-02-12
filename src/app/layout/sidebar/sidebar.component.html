@@ -1,0 +1,27 @@
+<nav class="sidebar" [class.collapsed]="isCollapsed()">
+  <div class="sidebar-header">
+    <div class="logo-section">
+      <i class="pi pi-building"></i>
+      @if (!isCollapsed()) {
+        <div class="logo-text">
+          <div class="logo-title">Solid Rock Solutions</div>
+          <div class="logo-subtitle">Remote Monitoring</div>
+        </div>
+      }
+    </div>
+    <p-button 
+      [icon]="isCollapsed() ? 'pi pi-chevron-right' : 'pi pi-chevron-left'"
+      [text]="true"
+      [rounded]="true"
+      (click)="toggleCollapse()"
+      [pTooltip]="isCollapsed() ? 'Expand sidebar' : 'Collapse sidebar'"
+      tooltipPosition="right">
+    </p-button>
+  </div>
+
+  <p-menu 
+    [model]="menuItems()" 
+    styleClass="sidebar-menu"
+    [class.devices-menu-open]="isDevicesMenuOpen()"
+    #menu></p-menu>
+</nav>

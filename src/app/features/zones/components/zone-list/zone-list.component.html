@@ -1,0 +1,132 @@
+<div class="zone-list">
+  <p-card>
+    <ng-template pTemplate="header">
+      <div class="card-header">
+        <div>
+          <h2>Zones</h2>
+          <p class="subtitle">Manage geographic zones for organizing sites</p>
+        </div>
+        @if (canManageZones()) {
+          <p-button 
+            label="Create Zone" 
+            icon="pi pi-plus" 
+            (onClick)="showCreateForm()"
+            class="ml-auto">
+          </p-button>
+        }
+      </div>
+    </ng-template>
+
+    <app-error-message [onDismiss]="clearError" />
+    <app-loading-spinner />
+
+    @if (!loadingService.loading()) {
+      <p-table [value]="zones()" dataKey="id" [rowTrackBy]="trackByZoneId" [paginator]="true" [rows]="10" [first]="tableFirst()"
+               [showCurrentPageReport]="true" [lazy]="true" (onLazyLoad)="onLazyLoad($event)" [totalRecords]="totalRecords()"
+               [sortField]="sortField()" [sortOrder]="sortOrder()"
+               currentPageReportTemplate="Showing {first} to {last} of {totalRecords} entries"
+               [rowsPerPageOptions]="[10, 25, 50]">
+        <ng-template pTemplate="header">
+          <tr>
+            <th [pSortableColumn]="'name'">Name <p-sortIcon [field]="'name'" /></th>
+            <th [pSortableColumn]="'description'">Description <p-sortIcon [field]="'description'" /></th>
+            <th [pSortableColumn]="'createdDate'">Created <p-sortIcon [field]="'createdDate'" /></th>
+            @if (canManageZones()) {
+              <th>Actions</th>
+            }
+          </tr>
+          <tr class="filter-row">
+            <th>
+              <input type="text" pInputText [(ngModel)]="filterName" (input)="onFilterChange()" placeholder="Filter name" class="filter-input" />
+            </th>
+            <th></th>
+            <th></th>
+            @if (canManageZones()) {
+              <th></th>
+            }
+          </tr>
+        </ng-template>
+        <ng-template pTemplate="body" let-zone>
+          <tr>
+            <td>{{ zone.name }}</td>
+            <td>{{ zone.description || '-' }}</td>
+            <td>{{ zone.createdDate | date:'short' }}</td>
+            @if (canManageZones()) {
+              <td>
+                <p-button 
+                  icon="pi pi-pencil" 
+                  [text]="true" 
+                  [rounded]="true"
+                  severity="info"
+                  (onClick)="editZone(zone)"
+                  pTooltip="Edit"
+                  tooltipPosition="top">
+                </p-button>
+                <p-button 
+                  icon="pi pi-trash" 
+                  [text]="true" 
+                  [rounded]="true"
+                  severity="danger"
+                  (onClick)="deleteZone(zone.id)"
+                  pTooltip="Delete"
+                  tooltipPosition="top">
+                </p-button>
+              </td>
+            }
+          </tr>
+        </ng-template>
+      </p-table>
+    }
+    @if (!loadingService.loading() && zones().length === 0) {
+      <div class="empty-state">
+        <i class="pi pi-inbox" style="font-size: 3rem; color: #999;"></i>
+        <p>No zones found. Create your first zone!</p>
+      </div>
+    }
+  </p-card>
+
+  <app-modal
+    [isOpen]="showModal()"
+    [title]="editingZone() ? 'Edit Zone' : 'Create Zone'"
+    (close)="closeModal()">
+    <form (ngSubmit)="saveZone()">
+      <div class="p-field">
+        <label for="name">Name *</label>
+        <input 
+          id="name"
+          type="text" 
+          pInputText 
+          [(ngModel)]="formData.name" 
+          name="name" 
+          required 
+          class="full-width" />
+      </div>
+
+      <div class="p-field">
+        <label for="description">Description</label>
+        <textarea 
+          id="description"
+          pTextarea 
+          [(ngModel)]="formData.description" 
+          name="description" 
+          rows="3"
+          class="full-width">
+        </textarea>
+      </div>
+
+      <div class="form-actions">
+        <p-button 
+          label="Cancel" 
+          [text]="true"
+          (onClick)="closeModal()" 
+          type="button">
+        </p-button>
+        <p-button 
+          label="Save" 
+          type="submit"
+          [style]="{'margin-left': '0.5rem'}">
+        </p-button>
+      </div>
+    </form>
+  </app-modal>
+</div>

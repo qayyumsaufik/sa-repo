@@ -1,0 +1,192 @@
+<div class="event-list">
+  <p-card>
+    <ng-template pTemplate="header">
+      <div class="card-header">
+        <div>
+          <h2>Events</h2>
+        </div>
+        @if (unresolvedCount() > 0) {
+          <p-badge [value]="unresolvedCount().toString()" severity="warn">
+            <span style="margin-left: 0.5rem;">Unresolved</span>
+          </p-badge>
+        }
+      </div>
+    </ng-template>
+
+    <app-error-message [onDismiss]="clearError" />
+    <app-loading-spinner />
+
+    <!-- Filters -->
+    <div class="filters">
+      <p-dropdown 
+        [options]="statusOptions"
+        [(ngModel)]="filterResolved"
+        (onChange)="applyFilters()"
+        placeholder="Status"
+        optionLabel="label"
+        optionValue="value"
+        [style]="{'width': '200px'}">
+      </p-dropdown>
+
+      <p-dropdown 
+        [options]="sensorOptions()"
+        [(ngModel)]="selectedSensorId"
+        (onChange)="applyFilters()"
+        placeholder="Sensor"
+        optionLabel="label"
+        optionValue="value"
+        [showClear]="true"
+        [style]="{'width': '200px'}">
+      </p-dropdown>
+
+      <p-dropdown 
+        [options]="eventTypeOptions()"
+        [(ngModel)]="selectedEventTypeId"
+        (onChange)="applyFilters()"
+        placeholder="Event Type"
+        optionLabel="label"
+        optionValue="value"
+        [showClear]="true"
+        [style]="{'width': '200px'}">
+      </p-dropdown>
+
+      <p-calendar 
+        [(ngModel)]="startDate"
+        (onSelect)="applyFilters()"
+        placeholder="Start Date"
+        dateFormat="yy-mm-dd"
+        [showIcon]="true"
+        [style]="{'width': '200px'}">
+      </p-calendar>
+
+      <p-calendar 
+        [(ngModel)]="endDate"
+        (onSelect)="applyFilters()"
+        placeholder="End Date"
+        dateFormat="yy-mm-dd"
+        [showIcon]="true"
+        [style]="{'width': '200px'}">
+      </p-calendar>
+
+      <p-button 
+        label="Clear Filters" 
+        icon="pi pi-filter-slash"
+        severity="secondary"
+        (onClick)="clearFilters()">
+      </p-button>
+    </div>
+
+    @if (!loadingService.loading()) {
+      <p-table [value]="events()" dataKey="id" [rowTrackBy]="trackByEventId" [paginator]="true" [rows]="10" [showCurrentPageReport]="true" 
+               [lazy]="true" (onLazyLoad)="onLazyLoad($event)" [totalRecords]="totalRecords()"
+               currentPageReportTemplate="Showing {first} to {last} of {totalRecords} entries"
+               [rowsPerPageOptions]="[10, 25, 50]"
+               [scrollable]="true"
+               scrollHeight="600px">
+        <ng-template pTemplate="header">
+          <tr>
+            <th>Time Raised</th>
+            <th>Sensor</th>
+            <th>Device</th>
+            <th>Site</th>
+            <th>Zone</th>
+            <th>Event Type</th>
+            <th>Severity</th>
+            <th>Message</th>
+            <th>Status</th>
+            <th>Resolved By</th>
+            <th>Resolved At</th>
+            @if (canResolveEvents() || canManageEvents()) {
+              <th>Actions</th>
+            }
+          </tr>
+        </ng-template>
+        <ng-template pTemplate="body" let-event>
+          <tr>
+            <td>{{ event.timeRaised | date:'short' }}</td>
+            <td>{{ event.sensorName }}</td>
+            <td>{{ event.deviceName }}</td>
+            <td>{{ event.siteName }}</td>
+            <td>{{ event.zoneName }}</td>
+            <td>{{ event.eventTypeName }}</td>
+            <td>
+              <p-tag [value]="event.eventTypeSeverity" [severity]="getSeveritySeverity(event.eventTypeSeverity)"></p-tag>
+            </td>
+            <td>{{ event.message }}</td>
+            <td>
+              <p-tag [value]="event.resolved ? 'Resolved' : 'Unresolved'" 
+                     [severity]="event.resolved ? 'success' : 'warn'">
+              </p-tag>
+            </td>
+            <td>{{ event.resolvedByName || '-' }}</td>
+            <td>{{ event.resolvedAt ? (event.resolvedAt | date:'short') : '-' }}</td>
+            @if (canResolveEvents() || canManageEvents()) {
+              <td>
+                @if (canResolveEvents() && !event.resolved) {
+                  <p-button 
+                    label="Resolve" 
+                    icon="pi pi-check-circle"
+                    severity="success"
+                    [size]="'small'"
+                    (onClick)="showResolveForm(event)"
+                    [style]="{'margin-right': '0.5rem'}">
+                  </p-button>
+                }
+                @if (canManageEvents()) {
+                  <p-button 
+                    icon="pi pi-trash" 
+                    [text]="true" 
+                    [rounded]="true"
+                    severity="danger"
+                    (onClick)="deleteEvent(event.id)"
+                    pTooltip="Delete Event"
+                    tooltipPosition="top">
+                  </p-button>
+                }
+              </td>
+            }
+          </tr>
+        </ng-template>
+      </p-table>
+    }
+    @if (!loadingService.loading() && events().length === 0) {
+      <div class="empty-state">
+        <i class="pi pi-inbox" style="font-size: 3rem; color: #999;"></i>
+        <p>No events found.</p>
+      </div>
+    }
+  </p-card>
+
+  <app-modal
+    [isOpen]="showResolveModal()"
+    [title]="'Resolve Event'"
+    (close)="closeResolveModal()">
+    <form (ngSubmit)="resolveEvent()">
+      <div class="p-field">
+        <label for="resolutionNotes">Resolution Notes (Optional)</label>
+        <textarea 
+          id="resolutionNotes"
+          pTextarea 
+          [(ngModel)]="resolutionNotes" 
+          name="resolutionNotes" 
+          rows="4"
+          class="full-width">
+        </textarea>
+      </div>
+      <div class="form-actions">
+        <p-button 
+          label="Cancel" 
+          [text]="true"
+          (onClick)="closeResolveModal()" 
+          type="button">
+        </p-button>
+        <p-button 
+          label="Resolve" 
+          type="submit"
+          severity="success"
+          [style]="{'margin-left': '0.5rem'}">
+        </p-button>
+      </div>
+    </form>
+  </app-modal>
+</div>

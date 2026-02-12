@@ -1,0 +1,141 @@
+<div class="regtype-list">
+  <p-card>
+    <ng-template pTemplate="header">
+      <div class="card-header">
+        <div>
+          <h2>RegTypes</h2>
+          <p class="subtitle">Manage register types for sensor data</p>
+        </div>
+        @if (canManageRegTypes()) {
+          <p-button 
+            label="Create RegType" 
+            icon="pi pi-plus" 
+            (onClick)="showCreateForm()" 
+            [style]="{'margin-left': 'auto'}">
+          </p-button>
+        }
+      </div>
+    </ng-template>
+
+    <app-error-message [onDismiss]="clearError" />
+    <app-loading-spinner />
+
+    @if (!loadingService.loading()) {
+      <p-table [value]="regTypes()" dataKey="id" [rowTrackBy]="trackByRegTypeId" [paginator]="true" [rows]="10" [showCurrentPageReport]="true" 
+               [lazy]="true" (onLazyLoad)="onLazyLoad($event)" [totalRecords]="totalRecords()"
+               currentPageReportTemplate="Showing {first} to {last} of {totalRecords} entries"
+               [rowsPerPageOptions]="[10, 25, 50]">
+        <ng-template pTemplate="header">
+          <tr>
+            <th>Name</th>
+            <th>Count</th>
+            <th>Data Type</th>
+            <th>Created</th>
+            @if (canManageRegTypes()) {
+              <th>Actions</th>
+            }
+          </tr>
+        </ng-template>
+        <ng-template pTemplate="body" let-regType>
+          <tr>
+            <td>{{ regType.name }}</td>
+            <td>{{ regType.count }}</td>
+            <td>
+              <p-tag [value]="regType.dataType" severity="info"></p-tag>
+            </td>
+            <td>{{ regType.createdDate | date:'short' }}</td>
+            @if (canManageRegTypes()) {
+              <td>
+                <p-button 
+                  icon="pi pi-pencil" 
+                  [text]="true" 
+                  [rounded]="true"
+                  severity="info"
+                  (onClick)="editRegType(regType)"
+                  pTooltip="Edit"
+                  tooltipPosition="top">
+                </p-button>
+                <p-button 
+                  icon="pi pi-trash" 
+                  [text]="true" 
+                  [rounded]="true"
+                  severity="danger"
+                  (onClick)="deleteRegType(regType.id)"
+                  pTooltip="Delete"
+                  tooltipPosition="top">
+                </p-button>
+              </td>
+            }
+          </tr>
+        </ng-template>
+      </p-table>
+    }
+    @if (!loadingService.loading() && regTypes().length === 0) {
+      <div class="empty-state">
+        <i class="pi pi-inbox" style="font-size: 3rem; color: #999;"></i>
+        <p>No RegTypes found. Create your first RegType!</p>
+      </div>
+    }
+  </p-card>
+
+  <app-modal
+    [isOpen]="showModal()"
+    [title]="editingRegType() ? 'Edit RegType' : 'Create RegType'"
+    (close)="closeModal()">
+    <form (ngSubmit)="saveRegType()">
+      <div class="p-field">
+        <label for="name">Name *</label>
+        <input 
+          id="name"
+          type="text" 
+          pInputText 
+          [(ngModel)]="formData.name" 
+          name="name" 
+          required 
+          maxlength="50"
+          class="full-width" />
+        <small>Unique name for the RegType (e.g., Level, Amps, Fault)</small>
+      </div>
+
+      <div class="p-field">
+        <label for="count">Count *</label>
+        <p-inputNumber 
+          id="count"
+          [(ngModel)]="formData.count" 
+          name="count" 
+          [min]="1"
+          [showButtons]="true"
+          class="full-width">
+        </p-inputNumber>
+        <small>Number of values per reading (e.g., Level=2, Fault=1)</small>
+      </div>
+
+      <div class="p-field">
+        <label for="dataType">Data Type *</label>
+        <p-dropdown 
+          id="dataType"
+          [options]="dataTypes" 
+          [(ngModel)]="formData.dataType" 
+          name="dataType"
+          placeholder="Select data type"
+          class="full-width">
+        </p-dropdown>
+        <small>Data type for the values (float, int, or bool)</small>
+      </div>
+
+      <div class="form-actions">
+        <p-button 
+          label="Cancel" 
+          [text]="true"
+          (onClick)="closeModal()" 
+          type="button">
+        </p-button>
+        <p-button 
+          label="Save" 
+          type="submit"
+          [style]="{'margin-left': '0.5rem'}">
+        </p-button>
+      </div>
+    </form>
+  </app-modal>
+</div>

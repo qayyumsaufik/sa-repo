@@ -1,0 +1,120 @@
+<div class="reading-list">
+  <p-card>
+    <ng-template pTemplate="header">
+      <div class="card-header">
+        <div>
+          <h2>Sensor Readings</h2>
+          <p class="subtitle">View sensor reading data</p>
+        </div>
+      </div>
+    </ng-template>
+
+    <app-error-message [onDismiss]="clearError" />
+    <app-loading-spinner />
+
+    <!-- Filters -->
+    <div class="filters">
+      <p-dropdown 
+        [options]="sensorOptions()"
+        [(ngModel)]="selectedSensorId"
+        (onChange)="applyFilters()"
+        placeholder="Select a Sensor"
+        optionLabel="label"
+        optionValue="value"
+        [showClear]="true"
+        [style]="{'width': '300px'}">
+      </p-dropdown>
+
+      <p-calendar 
+        [(ngModel)]="startDate"
+        (onSelect)="applyFilters()"
+        placeholder="Start Date"
+        dateFormat="yy-mm-dd"
+        [showIcon]="true"
+        [style]="{'width': '200px'}">
+      </p-calendar>
+
+      <p-calendar 
+        [(ngModel)]="endDate"
+        (onSelect)="applyFilters()"
+        placeholder="End Date"
+        dateFormat="yy-mm-dd"
+        [showIcon]="true"
+        [style]="{'width': '200px'}">
+      </p-calendar>
+
+      <p-button 
+        label="Clear Filters" 
+        icon="pi pi-filter-slash"
+        severity="secondary"
+        (onClick)="clearFilters()">
+      </p-button>
+    </div>
+
+    <!-- Latest Reading Summary -->
+    @if (latestReading() && !loadingService.loading()) {
+      <p-card class="latest-reading-card">
+        <ng-template pTemplate="header">
+          <h3>Latest Reading</h3>
+        </ng-template>
+        <div class="reading-summary">
+          <div class="summary-item">
+            <span class="label">Sensor:</span>
+            <span class="value">{{ latestReading()!.sensorName }}</span>
+          </div>
+          <div class="summary-item">
+            <span class="label">Timestamp:</span>
+            <span class="value">{{ latestReading()!.timestamp | date:'short' }}</span>
+          </div>
+          <div class="summary-item">
+            <span class="label">Values:</span>
+            <div class="values-list">
+              @for (value of latestReading()!.values; track value.id) {
+                <p-tag [value]="'Index ' + value.valueIndex + ': ' + formatValue(value.value, value.valueType)" severity="info"></p-tag>
+              }
+            </div>
+          </div>
+        </div>
+      </p-card>
+    }
+
+    <!-- Readings Table -->
+    @if (!loadingService.loading() && selectedSensorId()) {
+      <p-table [value]="readings()" dataKey="id" [rowTrackBy]="trackByReadingId" [paginator]="true" [rows]="10" [showCurrentPageReport]="true" 
+               [lazy]="true" (onLazyLoad)="onLazyLoad($event)" [totalRecords]="totalRecords()"
+               currentPageReportTemplate="Showing {first} to {last} of {totalRecords} entries"
+               [rowsPerPageOptions]="[10, 25, 50]">
+        <ng-template pTemplate="header">
+          <tr>
+            <th>Timestamp</th>
+            <th>Sensor</th>
+            <th>Values</th>
+          </tr>
+        </ng-template>
+        <ng-template pTemplate="body" let-reading>
+          <tr>
+            <td>{{ reading.timestamp | date:'short' }}</td>
+            <td>{{ reading.sensorName }}</td>
+            <td>
+              <div class="values-list">
+                @for (value of reading.values; track value.id) {
+                  <p-tag [value]="'[' + value.valueIndex + ']: ' + formatValue(value.value, value.valueType)" severity="info"></p-tag>
+                }
+              </div>
+            </td>
+          </tr>
+        </ng-template>
+      </p-table>
+    } @else if (!loadingService.loading() && readings().length === 0 && selectedSensorId()) {
+      <div class="empty-state">
+        <i class="pi pi-inbox" style="font-size: 3rem; color: #999;"></i>
+        <p>No readings found for the selected sensor and date range.</p>
+      </div>
+    } @else if (!loadingService.loading() && !selectedSensorId()) {
+      <div class="empty-state">
+        <i class="pi pi-info-circle" style="font-size: 3rem; color: #999;"></i>
+        <p>Please select a sensor to view readings.</p>
+      </div>
+    }
+  </p-card>
+</div>
